@@ -1,20 +1,28 @@
 import numpy as np
-import time
 import pygame
+from pygame.locals import *
 
-world_x_limit = 128
-world_y_limit = 128
+# define dimensions of world space
+world_x_limit = 64
+world_y_limit = 64
+# define shape of world space
 world_size = (world_x_limit, world_y_limit)
-# world_space = np.zeros(world_size)
-world_space = np.random.binomial(1, 0.1, size=(world_x_limit, world_y_limit))
+# define ratio of world space size to display size
+display_scale = 8
+# define shape of display
+display_size = (world_x_limit * display_scale, world_y_limit * display_scale)
+# populate world space with active element noise at ratio 1:10
+world_space = np.random.binomial(1, 0.05, size=world_size)
+# populate next generation world space with inactive elements
 new_world_space = np.zeros(world_size)
+# define vectors surrounding each element to which rule checks are applied
 vectors = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
-
 # initialise pygame instance
 pygame.init()
+# set display caption
 pygame.display.set_caption('automata')
-# set game canvas
-world_screen = pygame.display.set_mode((world_x_limit, world_y_limit))
+# set display canvas
+world_screen = pygame.display.set_mode(display_size)
 
 
 # return volume of active cells adjacent to target cell
@@ -71,13 +79,23 @@ def main():
     running = True
 
     while running:
+        
+        for event in pygame.event.get():
+            if event.type == KEYDOWN and event.key == K_ESCAPE:
+                running = False
 
         for x, y in np.ndindex(world_space.shape):
             cell_outcome = report_cell_outcome(x, y)
+            rect_size = display_scale - 1
+            rect_x =  x * display_scale
+            rect_xa = rect_x - rect_size
+            rect_y =  y * display_scale
+            rect_ya = rect_y - rect_size
+            rect_shape = [rect_xa, rect_ya, rect_x, rect_y]
             if cell_outcome == 1:
-                world_screen.set_at((x, y), (255, 255, 255))
+                pygame.draw.rect(world_screen, (255, 255, 255), rect_shape)
             else:
-               world_screen.set_at((x, y), (0, 0, 0))
+                pygame.draw.rect(world_screen, (0, 0, 0), rect_shape)
                 
             new_world_space[x, y] = cell_outcome
 
@@ -85,8 +103,6 @@ def main():
 
         # render screen
         pygame.display.flip()
-
-        time.sleep(0.1)
-
+        
 
 main()
