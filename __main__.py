@@ -8,25 +8,10 @@ world_space = np.zeros(world_size)
 new_world_space = np.zeros(world_size)
 vectors = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 
-
-# print the world space
-def print_world_space():
-    print(world_space)
-
-
-# return the element at x, y coordinates
-def report_world_cell(x, y):
-    return world_space[x, y]
-
-
-# activate a cell at x, y coordinates
-def activate_world_cell(x, y):
-    new_world_space[x, y] = 1
-
-
-# activate an cell at x, y coordinates
-def deactivate_world_cell(x, y):
-    new_world_space[x, y] = 0
+# populate seed elements: beacon pattern
+def return_seed_elements():
+    seed = [[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 1]]
+    return seed
 
 
 # return volume of active cells adjacent to target cell
@@ -38,7 +23,7 @@ def report_adjacent_cells(x, y):
         x_vector = x - vector[0]
         y_vector = y - vector[1]
         # check adjacent cell is in world space
-        if (0 < x_vector <= world_x_limit) and (0 < y_vector <= world_x_limit):
+        if (0 < x_vector <= world_x_limit - 1) and (0 < y_vector <= world_x_limit - 1):
             # check adjacent cell is active
             if world_space[x_vector, y_vector] == 1:
                 # increment volume of adjacent active cells
@@ -49,6 +34,8 @@ def report_adjacent_cells(x, y):
 def report_cell_outcome(x, y):
 
     adjacent_cells = report_adjacent_cells(x, y)
+
+    cell_outcome = world_space[x, y]
 
     # Each dead cell adjacent to
     # exactly three live neighbors
@@ -79,6 +66,8 @@ def report_cell_outcome(x, y):
 def main():
 
     running = True
+
+    world_space[4:8, 4:8] = return_seed_elements()
 
     while running:
 
