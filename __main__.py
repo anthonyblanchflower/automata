@@ -1,17 +1,20 @@
 import numpy as np
 import time
+import pygame
 
-world_x_limit = 16
-world_y_limit = 16
+world_x_limit = 128
+world_y_limit = 128
 world_size = (world_x_limit, world_y_limit)
-world_space = np.zeros(world_size)
+# world_space = np.zeros(world_size)
+world_space = np.random.binomial(1, 0.1, size=(world_x_limit, world_y_limit))
 new_world_space = np.zeros(world_size)
 vectors = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 
-# populate seed elements: beacon pattern
-def return_seed_elements():
-    seed = [[1, 1, 0, 0], [1, 1, 0, 0], [0, 0, 1, 1], [0, 0, 1, 1]]
-    return seed
+# initialise pygame instance
+pygame.init()
+pygame.display.set_caption('automata')
+# set game canvas
+world_screen = pygame.display.set_mode((world_x_limit, world_y_limit))
 
 
 # return volume of active cells adjacent to target cell
@@ -67,18 +70,23 @@ def main():
 
     running = True
 
-    world_space[4:8, 4:8] = return_seed_elements()
-
     while running:
 
         for x, y in np.ndindex(world_space.shape):
-            new_world_space[x, y] = report_cell_outcome(x, y)
+            cell_outcome = report_cell_outcome(x, y)
+            if cell_outcome == 1:
+                world_screen.set_at((x, y), (255, 255, 255))
+            else:
+               world_screen.set_at((x, y), (0, 0, 0))
+                
+            new_world_space[x, y] = cell_outcome
 
         world_space[:] = new_world_space
 
-        print(world_space)
+        # render screen
+        pygame.display.flip()
 
-        time.sleep(2)
+        time.sleep(0.1)
 
 
 main()
