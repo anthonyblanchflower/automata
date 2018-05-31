@@ -8,9 +8,10 @@ world_y_limit = 64
 # define shape of world space
 world_size = (world_x_limit, world_y_limit)
 # define ratio of world space size to display size
-display_scale = 8
+display_sc_y = 10
+display_sc_x = 20
 # define shape of display
-display_size = (world_x_limit * display_scale, world_y_limit * display_scale)
+display_size = (world_x_limit * display_sc_x, world_y_limit * display_sc_y)
 # populate world space with active element noise at ratio 1:10
 world_space = np.random.binomial(1, 0.05, size=world_size)
 # populate next generation world space with inactive elements
@@ -88,8 +89,9 @@ def main():
             else:
                 if event.type == pygame.MOUSEMOTION:
                     m_x, m_y = event.pos
-                    c_x = int(round(m_x / display_scale, 0))
-                    c_y = int(round(m_y / display_scale, 0))
+                    c_x = int(round(m_x / display_sc_x, 0))
+                    c_y = int(round(m_y / display_sc_y, 0))
+                    new_seed = [[1, 1, 0, 0],  [1, 1, 0, 0],  [0, 0, 1, 1],  [0, 0, 1, 1]]
                     # print ( "m_x: " + str(m_x) + " , m_y: " + str(m_y))
                     # print ( "c_x: " + str(c_x) + " , c_y: " + str(c_y))
 
@@ -97,21 +99,23 @@ def main():
 
         for x, y in np.ndindex(world_space.shape):
             cell_outcome = report_cell_outcome(x, y)
-            rect_size = display_scale - 1
-            rect_x =  x * display_scale
-            rect_xa = rect_x - rect_size
-            rect_y =  y * display_scale
-            rect_ya = rect_y - rect_size
+            rect_size_x = display_sc_x - 1
+            rect_size_y = display_sc_y - 1
+            rect_x =  x * display_sc_x
+            rect_xa = rect_x - rect_size_x
+            rect_y =  y * display_sc_y
+            rect_ya = rect_y - rect_size_y
             rect_shape = [rect_xa, rect_ya, rect_x, rect_y]
             if cell_outcome == 1:
-                pygame.draw.rect(world_screen, (255, 255, 255), rect_shape)
+                pygame.draw.rect(world_screen, (153, 255, 51), rect_shape)
             else:
                 pygame.draw.rect(world_screen, (0, 0, 0), rect_shape)
         
             new_world_space[x, y] = cell_outcome
 
         if touch and (c_x > 0 and c_x < (world_x_limit - 5)) and (c_y > 0 and c_y < (world_y_limit - 5)):
-            new_world_space[c_x, c_y] = 1
+            # new_world_space[c_x, c_y] = 1
+            new_world_space[c_x:c_x + 4, c_y: c_y + 4] = new_seed
 
         world_space[:] = new_world_space
 
