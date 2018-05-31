@@ -80,9 +80,20 @@ def main():
 
     while running:
         
+        touch = False
+        
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
                 running = False
+            else:
+                if event.type == pygame.MOUSEMOTION:
+                    m_x, m_y = event.pos
+                    c_x = int(round(m_x / display_scale, 0))
+                    c_y = int(round(m_y / display_scale, 0))
+                    # print ( "m_x: " + str(m_x) + " , m_y: " + str(m_y))
+                    # print ( "c_x: " + str(c_x) + " , c_y: " + str(c_y))
+
+                    touch = True
 
         for x, y in np.ndindex(world_space.shape):
             cell_outcome = report_cell_outcome(x, y)
@@ -96,8 +107,11 @@ def main():
                 pygame.draw.rect(world_screen, (255, 255, 255), rect_shape)
             else:
                 pygame.draw.rect(world_screen, (0, 0, 0), rect_shape)
-                
+        
             new_world_space[x, y] = cell_outcome
+
+        if touch and (c_x > 0 and c_x < (world_x_limit - 5)) and (c_y > 0 and c_y < (world_y_limit - 5)):
+            new_world_space[c_x, c_y] = 1
 
         world_space[:] = new_world_space
 
