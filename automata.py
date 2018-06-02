@@ -1,6 +1,7 @@
 import numpy as np
 import pygame
 from pygame.locals import *
+import pygame.surfarray as surfarray
 
 # define dimensions of world space
 world_x_limit = 100
@@ -58,20 +59,20 @@ def report_cell_outcome(x, y):
 
     cell_outcome = world_space[x, y]
 
-    # Each inactive element adjacent to
+    # each inactive element adjacent to
     # exactly three active neighbors
     # will become active in the next generation
     if adjacent_cells == 3 and world_space[x, y] == 0:
         cell_outcome = 1
     else:
         if world_space[x, y] > 0:
-            # Each active element with one or
+            # each active element with one or
             # fewer active neighbors will become inactive
             # in the next generation
             if adjacent_cells < 1:
                 cell_outcome = 0
             else:
-                # Each active element with either two or
+                # each active element with either two or
                 # three active neighbors will remain
                 # active for the next generation and will
                 # increase in age
@@ -79,7 +80,7 @@ def report_cell_outcome(x, y):
                     if cell_outcome < 9:
                         cell_outcome += 1
                 else:
-                    # Each active element with four or more
+                    # each active element with four or more
                     # active neighbors will become inactive in the
                     # next generation
                     cell_outcome = 0
@@ -92,10 +93,12 @@ def main():
 
     while running:
 
+        # capture escape event
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
                 running = False
 
+        # populate next generation of elements
         for x, y in np.ndindex(world_space.shape):
             cell_outcome = report_cell_outcome(x, y)
             rect_size_x = display_sc_x - 1
@@ -112,10 +115,22 @@ def main():
 
             new_world_space[x, y] = cell_outcome
 
+        # load next generation of elements to world space
         world_space[:] = new_world_space
+
+        # apply post processing
+        rgbarray = surfarray.array3d(world_screen)
+        soften = np.array(rgbarray)
+        soften[1:, :] += rgbarray[:-1, :] * 8
+        soften[:-1, :] += rgbarray[1:, :] * 8
+        soften[:, 1:] += rgbarray[:, :-1] * 8
+        soften[:, :-1] += rgbarray[:, 1:] * 8
+        screen = pygame.display.set_mode(soften.shape[:2], 0, 32)
+        surfarray.blit_array(screen, soften)
 
         # render screen
         pygame.display.flip()
 
 
-main()
+if __name__ == "__main__":
+    main()
