@@ -4,8 +4,8 @@ from pygame.locals import *
 import pygame.surfarray as surfarray
 
 # define dimensions of world space
-world_x_limit = 100
-world_y_limit = 100
+world_x_limit = 64
+world_y_limit = 64
 # define shape of world space
 world_size = (world_x_limit, world_y_limit)
 # define ratio of world space size to display size
@@ -13,8 +13,15 @@ display_sc_y = 10
 display_sc_x = 10
 # define shape of display
 display_size = (world_x_limit * display_sc_x, world_y_limit * display_sc_y)
-# populate world space with active element noise at ratio 1:10
-world_space = np.random.binomial(1, 0.05, size=world_size)
+# populate world space with active element noise at ratio 1
+## random seed noise:
+## world_space = np.random.binomial(1, 0.05, size=world_size)
+## R Pentomino seed:
+world_space = np.zeros(world_size)
+c_x = int(round((world_x_limit / 2) - 1))
+c_y = int(round((world_y_limit / 2) - 1))
+new_seed = [[0, 1, 1],  [1, 1, 0],  [0, 1, 0]]
+world_space[c_x:c_x + 3, c_y: c_y + 3] = new_seed 
 # populate next generation world space with inactive elements
 new_world_space = np.zeros(world_size)
 # define vectors surrounding each element to which rule checks are applied
@@ -109,7 +116,7 @@ def main():
             rect_ya = rect_y - rect_size_y
             rect_shape = [rect_xa, rect_ya, rect_x, rect_y]
             if cell_outcome > 0:
-                pygame.draw.rect(world_screen, colors[cell_outcome - 1], rect_shape)
+                pygame.draw.rect(world_screen, colors[int(cell_outcome - 1)], rect_shape)
             else:
                 pygame.draw.rect(world_screen, (0, 0, 0), rect_shape)
 
