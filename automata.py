@@ -2,6 +2,8 @@ import numpy as np
 import pygame
 from pygame.locals import *
 import pygame.surfarray as surfarray
+import time
+import datetime
 
 # define dimensions of world space
 world_x_limit = 96
@@ -73,6 +75,7 @@ def main():
     gen_count = 0
 
     while running:
+        timer_start = time.time()
         # capture escape event
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -98,10 +101,6 @@ def main():
         # load next generation of elements to world space
         world_space[:] = new_world_space
 
-        gen_count += 1
-        text_surface = gamefont.render("generations: " + str(gen_count), False, (17, 102, 0))
-        world_screen.blit(text_surface, (5, 5))
-
         # apply post processing
         rgbarray = surfarray.array3d(world_screen)
         factor = np.array((8,), np.int32)
@@ -114,6 +113,12 @@ def main():
         soften //= 16
         screen = pygame.display.set_mode(soften.shape[:2], 0, 32)
         surfarray.blit_array(screen, soften)
+
+        gen_count += 1
+        timer_stop = time.time()
+        text_surface = gamefont.render(
+            "generations: " + str(gen_count) + "   cycle time: " + str(timer_stop - timer_start), False, (17, 102, 0))
+        world_screen.blit(text_surface, (5, 5))
 
         # render screen
         pygame.display.flip()
