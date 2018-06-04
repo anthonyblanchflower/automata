@@ -4,13 +4,13 @@ from pygame.locals import *
 import pygame.surfarray as surfarray
 
 # define dimensions of world space
-world_x_limit = 64
-world_y_limit = 64
+world_x_limit = 96
+world_y_limit = 96
 # define shape of world space
 world_size = (world_x_limit, world_y_limit)
 # define ratio of world space size to display size
-display_sc_y = 10
-display_sc_x = 10
+display_sc_y = 8
+display_sc_x = 8
 # define shape of display
 display_size = (world_x_limit * display_sc_x, world_y_limit * display_sc_y)
 # populate world space with active element noise at ratio 1
@@ -69,28 +69,41 @@ def report_cell_outcome(x, y):
     # each inactive element adjacent to
     # exactly three active neighbors
     # will become active in the next generation
-    if adjacent_cells == 3 and world_space[x, y] == 0:
-        cell_outcome = 1
-    else:
-        if world_space[x, y] > 0:
+    #if adjacent_cells == 3 and world_space[x, y] == 0:
+    #    cell_outcome = 1
+    #else:
+    #    if world_space[x, y] > 0:
             # each active element with one or
             # fewer active neighbors will become inactive
             # in the next generation
-            if adjacent_cells < 1:
-                cell_outcome = 0
-            else:
+    #        if adjacent_cells < 1:
+    #            cell_outcome = 0
+    #        else:
                 # each active element with either two or
                 # three active neighbors will remain
                 # active for the next generation and will
                 # increase in age
-                if adjacent_cells < 4:
-                    if cell_outcome < 9:
-                        cell_outcome += 1
-                else:
+    #            if adjacent_cells < 4:
+    #                if cell_outcome < 9:
+    #                    cell_outcome += 1
+    #            else:
                     # each active element with four or more
                     # active neighbors will become inactive in the
                     # next generation
-                    cell_outcome = 0
+    #                cell_outcome = 0
+
+    if adjacent_cells == 2:
+        if 0 < cell_outcome < 9:
+            cell_outcome += 1
+    else:
+        if adjacent_cells == 3:
+            if 0 < cell_outcome < 9:
+                cell_outcome += 1
+            else:
+                if cell_outcome == 0:
+                    cell_outcome = 1
+        else:
+            cell_outcome == 0
 
     return cell_outcome
 
@@ -127,11 +140,14 @@ def main():
 
         # apply post processing
         rgbarray = surfarray.array3d(world_screen)
-        soften = np.array(rgbarray)
-        soften[1:, :] += rgbarray[:-1, :] * 8
-        soften[:-1, :] += rgbarray[1:, :] * 8
-        soften[:, 1:] += rgbarray[:, :-1] * 8
-        soften[:, :-1] += rgbarray[:, 1:] * 8
+        factor = np.array((8,), np.int32)
+        # soften = np.array(rgbarray)
+        soften = np.array(rgbarray, np.int32)
+        soften[1:, :] += rgbarray[:-1, :] * factor
+        soften[:-1, :] += rgbarray[1:, :] * factor
+        soften[:, 1:] += rgbarray[:, :-1] * factor
+        soften[:, :-1] += rgbarray[:, 1:] * factor
+        # soften //= 33
         screen = pygame.display.set_mode(soften.shape[:2], 0, 32)
         surfarray.blit_array(screen, soften)
 
