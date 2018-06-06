@@ -3,7 +3,9 @@ import pygame
 from pygame.locals import *
 import pygame.surfarray as surfarray
 import time
-import datetime
+import argparse
+import sys
+import json
 
 # define dimensions of world space
 world_x_limit = 96
@@ -15,13 +17,8 @@ display_sc_y = 5
 display_sc_x = 5
 # define shape of display
 display_size = (world_x_limit * display_sc_x, world_y_limit * display_sc_y)
-# create R Pentomino seed
+# populate world space with inactive elements
 world_space = np.zeros(world_size)
-c_x = int(round((world_x_limit / 2) - 1))
-c_y = int(round((world_y_limit / 2) - 1))
-new_seed = [[0, 1, 1],  [1, 1, 0],  [0, 1, 0]]
-world_space[c_x:c_x + 3, c_y: c_y + 3] = new_seed 
-# populate next generation world space with inactive elements
 new_world_space = np.zeros(world_size)
 # define vectors surrounding each element to which rule checks are applied
 vectors = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
@@ -35,6 +32,30 @@ pygame.font.init()
 gamefont = pygame.font.SysFont('Ariel', 24)
 # set display canvas
 world_screen = pygame.display.set_mode(display_size)
+
+
+# parse external arguments
+def check_arg(args=None):
+    parser = argparse.ArgumentParser(description='A cellular automata application')
+    parser.add_argument('-s',
+                        '--seed',
+                        help='seed cells for first generation',
+                        required=True,
+                        default='r_pentomino.json')
+    results = parser.parse_args(args)
+    return results.seed
+
+
+# insert seed array for first generation into world space
+def inject_seed(seed_json):
+    with open('./data/seeds/' + seed_json, 'r') as f:
+        seed_dict = json.load(f)
+    seed_array = seed_dict['seed_array']
+    seed_name = seed_dict['seed_name']
+    c_x = int(round((world_x_limit / 2) - 1))
+    c_y = int(round((world_y_limit / 2) - 1))
+    world_space[c_x:c_x + 3, c_y: c_y + 3] = seed_array
+    return seed_name
 
 
 # return volume of active cells adjacent to target cell
@@ -74,8 +95,13 @@ def main():
     running = True
     gen_count = 0
 
+    # from seed argument, load seed array into world space
+    seed_file = check_arg(sys.argv[1:])
+    seed_label = inject_seed(seed_file)
+
     while running:
         timer_start = time.time()
+        
         # capture escape event
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -104,7 +130,6 @@ def main():
         # apply post processing
         rgbarray = surfarray.array3d(world_screen)
         factor = np.array((8,), np.int32)
-        # soften = np.array(rgbarray)
         soften = np.array(rgbarray, np.int32)
         soften[1:, :] += rgbarray[:-1, :] * factor
         soften[:-1, :] += rgbarray[1:, :] * factor
@@ -116,8 +141,12 @@ def main():
 
         gen_count += 1
         timer_stop = time.time()
+        timer_delta = str(timer_stop - timer_start)
         text_surface = gamefont.render(
-            "generations: " + str(gen_count) + "   cycle time: " + str(timer_stop - timer_start), False, (17, 102, 0))
+            "generations: " + str(gen_count) +
+            "   cycle time: " + timer_delta[0:5] +
+            "   seed: " + seed_label,
+            False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 5))
 
         # render screen
