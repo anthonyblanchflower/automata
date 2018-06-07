@@ -13,8 +13,8 @@ world_y_limit = 96
 # define shape of world space
 world_size = (world_x_limit, world_y_limit)
 # define ratio of world space size to display size
-display_sc_y = 5
-display_sc_x = 5
+display_sc_y = 10
+display_sc_x = 10
 # define shape of display
 display_size = (world_x_limit * display_sc_x, world_y_limit * display_sc_y)
 # populate world space with inactive elements
@@ -143,9 +143,9 @@ def main():
         timer_stop = time.time()
         timer_delta = str(timer_stop - timer_start)
         text_surface = gamefont.render(
-            "generations: " + str(gen_count) +
-            "   cycle time: " + timer_delta[0:5] +
-            "   seed: " + seed_label,
+            "gen: {x}  cycle: {y}  seed: {z}".format(x=gen_count,
+                                                                  y=timer_delta,
+                                                                  z=seed_label),
             False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 5))
 
