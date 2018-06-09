@@ -6,20 +6,9 @@ import time
 import argparse
 import sys
 import json
+import functools
+import psutil
 
-# define dimensions of world space
-world_x_limit = 96
-world_y_limit = 96
-# define shape of world space
-world_size = (world_x_limit, world_y_limit)
-# define ratio of world space size to display size
-display_sc_y = 10
-display_sc_x = 10
-# define shape of display
-display_size = (world_x_limit * display_sc_x, world_y_limit * display_sc_y)
-# populate world space with inactive elements
-world_space = np.zeros(world_size)
-new_world_space = np.zeros(world_size)
 # define vectors surrounding each element to which rule checks are applied
 vectors = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
 # initialise pygame instance
@@ -30,8 +19,6 @@ pygame.display.set_caption('automata')
 pygame.font.init()
 # set game font
 gamefont = pygame.font.SysFont('Ariel', 24)
-# set display canvas
-world_screen = pygame.display.set_mode(display_size)
 
 
 # parse external arguments
@@ -42,8 +29,26 @@ def check_arg(args=None):
                         help='seed cells for first generation',
                         required=True,
                         default='r_pentomino.json')
+    parser.add_argument('-x',
+                        '--xaxis',
+                        help='number of cells for world space x axis',
+                        type = int,
+                        required=True,
+                        default='64')
+    parser.add_argument('-y',
+                        '--yaxis',
+                        help='number of cells for world space y axis',
+                        type = int,
+                        required=True,
+                        default='64')
+    parser.add_argument('-S',
+                        '--scale',
+                        help='pixel scale for each cell',
+                        type = int,
+                        required=True,
+                        default='10')                    
     results = parser.parse_args(args)
-    return results.seed
+    return results.seed, results.xaxis, results.yaxis, results.scale
 
 
 # insert seed array for first generation into world space
@@ -95,10 +100,6 @@ def main():
     running = True
     gen_count = 0
 
-    # from seed argument, load seed array into world space
-    seed_file = check_arg(sys.argv[1:])
-    seed_label = inject_seed(seed_file)
-
     while running:
         timer_start = time.time()
         
@@ -110,15 +111,14 @@ def main():
         # populate next generation of elements
         for x, y in np.ndindex(world_space.shape):
             cell_outcome = report_cell_outcome(x, y)
-            rect_size_x = display_sc_x - 1
-            rect_size_y = display_sc_y - 1
-            rect_x = x * display_sc_x
-            rect_xa = rect_x - rect_size_x
-            rect_y = y * display_sc_y
-            rect_ya = rect_y - rect_size_y
+            rect_size = display_sc - 1
+            rect_x = x * display_sc
+            rect_xa = rect_x - rect_size
+            rect_y = y * display_sc
+            rect_ya = rect_y - rect_size
             rect_shape = [rect_xa, rect_ya, rect_x, rect_y]
             if cell_outcome > 0:
-                pygame.draw.rect(world_screen, (17, 102, 0), rect_shape)
+                pygame.draw.rect(world_screen, (21, 128, 0), rect_shape)
             else:
                 pygame.draw.rect(world_screen, (0, 0, 0), rect_shape)
 
@@ -141,11 +141,17 @@ def main():
 
         gen_count += 1
         timer_stop = time.time()
-        timer_delta = str(timer_stop - timer_start)
+        timer_delta = str(timer_stop - timer_start)[:5]
+        cpu_usage = psutil.cpu_percent()
         text_surface = gamefont.render(
-            "gen: {x}  cycle: {y}  seed: {z}".format(x=gen_count,
-                                                                  y=timer_delta,
-                                                                  z=seed_label),
+            "gen: {g}  cycle: {c}  cpu: {p}%  seed: {s}  size: {x}x{y}  scale: {S}".format(g=gen_count,
+                                                                  c=timer_delta,
+                                                                  p=cpu_usage,
+                                                                  s=seed_label,
+                                                                  x=world_x_limit,
+                                                                  y=world_y_limit,
+                                                                  S=display_sc
+                                                                  ),
             False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 5))
 
@@ -154,4 +160,19 @@ def main():
 
 
 if __name__ == "__main__":
+    
+    # ingest external arguments
+    seed_file, world_x_limit, world_y_limit, display_sc = check_arg(sys.argv[1:])
+    # define shape of world space
+    world_size = (world_x_limit, world_y_limit)
+    # define shape of display
+    display_size = (world_x_limit * display_sc, world_y_limit * display_sc)
+    # populate world space with inactive elements
+    world_space = np.zeros(world_size)
+    new_world_space = np.zeros(world_size)
+    # set display canvas
+    world_screen = pygame.display.set_mode(display_size)
+    # from seed argument, load seed array into world space
+    seed_label = inject_seed(seed_file)
+
     main()
