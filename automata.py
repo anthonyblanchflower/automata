@@ -6,7 +6,6 @@ import time
 import argparse
 import sys
 import json
-import functools
 import psutil
 
 # define vectors surrounding each element to which rule checks are applied
@@ -18,7 +17,7 @@ pygame.display.set_caption('automata')
 # initialise pygame font
 pygame.font.init()
 # set game font
-gamefont = pygame.font.SysFont('Ariel', 24)
+gamefont = pygame.font.SysFont('Consolas', 18)
 
 
 # parse external arguments
@@ -32,21 +31,21 @@ def check_arg(args=None):
     parser.add_argument('-x',
                         '--xaxis',
                         help='number of cells for world space x axis',
-                        type = int,
+                        type=int,
                         required=True,
                         default='64')
     parser.add_argument('-y',
                         '--yaxis',
                         help='number of cells for world space y axis',
-                        type = int,
+                        type=int,
                         required=True,
                         default='64')
     parser.add_argument('-S',
                         '--scale',
                         help='pixel scale for each cell',
-                        type = int,
+                        type=int,
                         required=True,
-                        default='10')                    
+                        default='10')
     results = parser.parse_args(args)
     return results.seed, results.xaxis, results.yaxis, results.scale
 
@@ -102,7 +101,7 @@ def main():
 
     while running:
         timer_start = time.time()
-        
+
         # capture escape event
         for event in pygame.event.get():
             if event.type == KEYDOWN and event.key == K_ESCAPE:
@@ -145,13 +144,13 @@ def main():
         cpu_usage = psutil.cpu_percent()
         text_surface = gamefont.render(
             "gen: {g}  cycle: {c}  cpu: {p}%  seed: {s}  size: {x}x{y}  scale: {S}".format(g=gen_count,
-                                                                  c=timer_delta,
-                                                                  p=cpu_usage,
-                                                                  s=seed_label,
-                                                                  x=world_x_limit,
-                                                                  y=world_y_limit,
-                                                                  S=display_sc
-                                                                  ),
+                                                                                           c=timer_delta,
+                                                                                           p=cpu_usage,
+                                                                                           s=seed_label,
+                                                                                           x=world_x_limit,
+                                                                                           y=world_y_limit,
+                                                                                           S=display_sc
+                                                                                           ),
             False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 5))
 
@@ -160,7 +159,6 @@ def main():
 
 
 if __name__ == "__main__":
-    
     # ingest external arguments
     seed_file, world_x_limit, world_y_limit, display_sc = check_arg(sys.argv[1:])
     # define shape of world space
