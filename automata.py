@@ -7,6 +7,7 @@ import argparse
 import sys
 import json
 import psutil
+import os
 
 # define vectors surrounding each element to which rule checks are applied
 vectors = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
@@ -52,7 +53,8 @@ def check_arg(args=None):
 
 # insert seed array for first generation into world space
 def inject_seed(seed_json):
-    with open('./data/seeds/' + seed_json, 'r') as f:
+    dir_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+    with open(dir_path + '/data/seeds/' + seed_json, 'r') as f:
         seed_dict = json.load(f)
     seed_array = seed_dict['seed_array']
     seed_name = seed_dict['seed_name']
