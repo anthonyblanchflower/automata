@@ -3,7 +3,6 @@ import os
 import subprocess
 import sys
 
-
 class Launcher(tkinter.Tk):
     def __init__(self, parent):
         tkinter.Tk.__init__(self, parent)
@@ -12,27 +11,32 @@ class Launcher(tkinter.Tk):
         self.initialize()
 
     def initialize(self):
+
         self.grid()
 
-        self.entryVariable_Seed = tkinter.StringVar()
-        self.entry_seed = tkinter.Entry(self, textvariable=self.entryVariable_Seed, fg="green", bg="black")
-        self.entry_seed.grid(column=0, row=0, sticky='EW')
-        self.entryVariable_Seed.set(u"Enter seed file name")
+        self.menuVariable_Seed = tkinter.StringVar()
+        self.seedList = []
+        for root, dirs, files in os.walk(os.path.dirname(os.path.realpath(sys.argv[0])) + "/data/seeds"):
+            for file in files:
+                if file.endswith('.json'):
+                    self.seedList.append(file)
+        self.menu_seed = tkinter.OptionMenu(self, self.menuVariable_Seed, *self.seedList)
+        self.menu_seed.grid(column=0, row=0, sticky='EW')
 
-        self.entryVariable_X = tkinter.StringVar()
-        self.entry_x = tkinter.Entry(self, textvariable=self.entryVariable_X, fg="green", bg="black")
-        self.entry_x.grid(column=0, row=3, sticky='EW')
-        self.entryVariable_X.set(u"Enter x axis for world")
+        self.menuVariable_X = tkinter.StringVar()
+        self.xList = ['12', '32', '64', '128', '256']
+        self.menu_x = tkinter.OptionMenu(self, self.menuVariable_X, *self.xList)
+        self.menu_x.grid(column=0, row=3, sticky='EW')
 
-        self.entryVariable_Y = tkinter.StringVar()
-        self.entry_y = tkinter.Entry(self, textvariable=self.entryVariable_Y, fg="green", bg="black")
-        self.entry_y.grid(column=0, row=5, sticky='EW')
-        self.entryVariable_Y.set(u"Enter y axis for world")
+        self.menuVariable_Y = tkinter.StringVar()
+        self.yList = ['12', '32', '64', '128', '256']
+        self.menu_y = tkinter.OptionMenu(self, self.menuVariable_Y, *self.yList)
+        self.menu_y.grid(column=0, row=5, sticky='EW')
 
-        self.entryVariable_Scale = tkinter.StringVar()
-        self.entry_scale = tkinter.Entry(self, textvariable=self.entryVariable_Scale, fg="green", bg="black")
-        self.entry_scale.grid(column=0, row=7, sticky='EW')
-        self.entryVariable_Scale.set(u"Enter pixel scale for cells")
+        self.menuVariable_Scale = tkinter.StringVar()
+        self.scaleList = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+        self.menu_scale = tkinter.OptionMenu(self, self.menuVariable_Scale, *self.scaleList)
+        self.menu_scale.grid(column=0, row=7, sticky='EW')
 
         button_seed = tkinter.Button(self, text=u"Set Seed  ", fg="black", bg="green",
                                      command=self.onbuttonclick_seed)
@@ -50,26 +54,30 @@ class Launcher(tkinter.Tk):
                                        command=self.onbuttonclick_launch)
         button_launch.grid(column=0, row=9, sticky='EW')
 
+
         self.labelVariable_Seed = tkinter.StringVar()
         label_seed = tkinter.Label(self, textvariable=self.labelVariable_Seed,
                                    anchor="w", fg="green", bg="black")
         label_seed.grid(column=0, row=1, columnspan=2, sticky='EW')
-        self.labelVariable_Seed.set(u" seed file name e.g. r_pentomino.json")
+        self.labelVariable_Seed.set(u" seed file name")
+
         self.labelVariable_X = tkinter.StringVar()
         label_x = tkinter.Label(self, textvariable=self.labelVariable_X,
                                 anchor="w", fg="green", bg="black")
         label_x.grid(column=0, row=4, columnspan=2, sticky='EW')
-        self.labelVariable_X.set(u" x axis e.g. 64")
+        self.labelVariable_X.set(u" x axis")
+
         self.labelVariable_Y = tkinter.StringVar()
         label_y = tkinter.Label(self, textvariable=self.labelVariable_Y,
                                 anchor="w", fg="green", bg="black")
         label_y.grid(column=0, row=6, columnspan=2, sticky='EW')
-        self.labelVariable_Y.set(u" y axis e.g. 64")
+        self.labelVariable_Y.set(u" y axis")
+
         self.labelVariable_Scale = tkinter.StringVar()
         label_scale = tkinter.Label(self, textvariable=self.labelVariable_Scale,
                                     anchor="w", fg="green", bg="black")
         label_scale.grid(column=0, row=8, columnspan=2, sticky='EW')
-        self.labelVariable_Scale.set(u" pixel scale e.g. 10")
+        self.labelVariable_Scale.set(u" pixel scale")
 
         self.grid_columnconfigure(0, weight=1)
         self.resizable(True, False)
@@ -77,26 +85,24 @@ class Launcher(tkinter.Tk):
         self.geometry(self.geometry())
 
     def onbuttonclick_seed(self):
-        self.labelVariable_Seed.set(self.entryVariable_Seed.get())
+        self.labelVariable_Seed.set(self.menuVariable_Seed.get())
 
     def onbuttonclick_x(self):
-        self.labelVariable_X.set(self.entryVariable_X.get())
+        self.labelVariable_X.set(self.menuVariable_X.get())
 
     def onbuttonclick_y(self):
-        self.labelVariable_Y.set(self.entryVariable_Y.get())
+        self.labelVariable_Y.set(self.menuVariable_Y.get())
 
     def onbuttonclick_scale(self):
-        self.labelVariable_Scale.set(self.entryVariable_Scale.get())
+        self.labelVariable_Scale.set(self.menuVariable_Scale.get())
 
     def onbuttonclick_launch(self):
-        dir_path = os.path.dirname(os.path.realpath(sys.argv[0]))
-        automata_call = "python3 " + dir_path + "/automata.py -s " \
+        self.automataCall = "python3 " + os.path.dirname(os.path.realpath(sys.argv[0])) + "/automata.py -s " \
                         + self.labelVariable_Seed.get() + \
                         " -x " + self.labelVariable_X.get() + \
                         " -y " + self.labelVariable_Y.get() + \
                         " -S " + self.labelVariable_Scale.get()
-        print(automata_call)
-        subprocess.call(automata_call, shell=True)
+        subprocess.call(self.automataCall, shell=True)
 
 
 if __name__ == "__main__":

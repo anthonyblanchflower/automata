@@ -58,9 +58,11 @@ def inject_seed(seed_json):
         seed_dict = json.load(f)
     seed_array = seed_dict['seed_array']
     seed_name = seed_dict['seed_name']
+    size_x = len(seed_array[0])
+    size_y = len(seed_array)
     c_x = int(round((world_x_limit / 2) - 1))
     c_y = int(round((world_y_limit / 2) - 1))
-    world_space[c_x:c_x + 3, c_y: c_y + 3] = seed_array
+    world_space[c_x:c_x + size_x, c_y: c_y + size_y] = seed_array
     return seed_name
 
 
