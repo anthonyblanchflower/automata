@@ -18,7 +18,8 @@ pygame.display.set_caption('automata')
 # initialise pygame font
 pygame.font.init()
 # set game font
-gamefont = pygame.font.SysFont('Consolas', 18)
+gamefont = pygame.font.SysFont('Impact', 20)
+#gamefont.set_bold(True)
 
 
 # parse external arguments
@@ -146,17 +147,18 @@ def main():
         timer_stop = time.time()
         timer_delta = str(timer_stop - timer_start)[:5]
         cpu_usage = psutil.cpu_percent()
-        text_surface = gamefont.render(
-            "gen: {g}  cycle: {c}  cpu: {p}%  seed: {s}  size: {x}x{y}  scale: {S}".format(g=gen_count,
-                                                                                           c=timer_delta,
-                                                                                           p=cpu_usage,
-                                                                                           s=seed_label,
-                                                                                           x=world_x_limit,
-                                                                                           y=world_y_limit,
-                                                                                           S=display_sc
-                                                                                           ),
-            False, (17, 102, 0))
+        text_surface = gamefont.render("seed: {s}".format(s=seed_label), False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 5))
+        text_surface = gamefont.render("gen: {g}".format(g=gen_count), False, (17, 102, 0))
+        world_screen.blit(text_surface, (5, 20))
+        text_surface = gamefont.render("cycle: {c}".format(c=timer_delta), False, (17, 102, 0))
+        world_screen.blit(text_surface, (5, 35))
+        text_surface = gamefont.render("cpu: {p}%".format(p=cpu_usage), False, (17, 102, 0))
+        world_screen.blit(text_surface, (5, 50))
+        text_surface = gamefont.render("size: {x}x{y}".format(x=world_x_limit, y=world_y_limit), False, (17, 102, 0))
+        world_screen.blit(text_surface, (5, 65))
+        text_surface = gamefont.render("scale: {S}".format(S=display_sc), False, (17, 102, 0))
+        world_screen.blit(text_surface, (5, 80))
 
         # render screen
         pygame.display.flip()
