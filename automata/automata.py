@@ -19,12 +19,16 @@ pygame.display.set_caption('automata')
 pygame.font.init()
 # set game font
 gamefont = pygame.font.SysFont('Impact', 20)
-#gamefont.set_bold(True)
 
 
 # parse external arguments
 def check_arg(args=None):
     parser = argparse.ArgumentParser(description='A cellular automata application')
+    parser.add_argument('-r',
+                        '--rules',
+                        help='automata rule string',
+                        required=True,
+                        default='game_of_life.json')
     parser.add_argument('-s',
                         '--seed',
                         help='seed cells for first generation',
@@ -49,7 +53,18 @@ def check_arg(args=None):
                         required=True,
                         default='10')
     results = parser.parse_args(args)
-    return results.seed, results.xaxis, results.yaxis, results.scale
+    return results.rules, results.seed, results.xaxis, results.yaxis, results.scale
+
+
+# insert rules
+def inject_rule(rule_json):
+    dir_path = os.path.dirname(os.path.realpath(sys.argv[0]))
+    with open(dir_path + '/data/rules/' + rule_json, 'r') as f:
+        rules_dict = json.load(f)
+    rule_name = rules_dict['rule_name']
+    birth_neighbours = rules_dict['birth']
+    survive_neighbours = rules_dict['survival']
+    return rule_name, birth_neighbours, survive_neighbours
 
 
 # insert seed array for first generation into world space
@@ -84,17 +99,17 @@ def report_adjacent_cells(x, y):
     return adjacent_active_cells
 
 
-def report_cell_outcome(x, y):
+def report_cell_outcome(x, y, birth, survive):
     adjacent_cells = report_adjacent_cells(x, y)
     cell_outcome = world_space[x, y]
 
     if cell_outcome == 1:
-        if adjacent_cells < 2 or adjacent_cells > 3:
+        if adjacent_cells not in survive:
             cell_outcome = 0
         else:
             cell_outcome = 1
     else:
-        if adjacent_cells == 3:
+        if adjacent_cells in birth:
             cell_outcome = 1
 
     return cell_outcome
@@ -114,7 +129,7 @@ def main():
 
         # populate next generation of elements
         for x, y in np.ndindex(world_space.shape):
-            cell_outcome = report_cell_outcome(x, y)
+            cell_outcome = report_cell_outcome(x, y, birth_list, survive_list)
             rect_size = display_sc - 1
             rect_x = x * display_sc
             rect_xa = rect_x - rect_size
@@ -147,18 +162,20 @@ def main():
         timer_stop = time.time()
         timer_delta = str(timer_stop - timer_start)[:5]
         cpu_usage = psutil.cpu_percent()
-        text_surface = gamefont.render("seed: {s}".format(s=seed_label), False, (17, 102, 0))
+        text_surface = gamefont.render("rules: {r}".format(r=rule_label), False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 5))
-        text_surface = gamefont.render("gen: {g}".format(g=gen_count), False, (17, 102, 0))
+        text_surface = gamefont.render("seed: {s}".format(s=seed_label), False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 25))
-        text_surface = gamefont.render("cycle: {c}".format(c=timer_delta), False, (17, 102, 0))
+        text_surface = gamefont.render("gen: {g}".format(g=gen_count), False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 45))
-        text_surface = gamefont.render("cpu: {p}%".format(p=cpu_usage), False, (17, 102, 0))
+        text_surface = gamefont.render("cycle: {c}".format(c=timer_delta), False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 65))
-        text_surface = gamefont.render("size: {x}x{y}".format(x=world_x_limit, y=world_y_limit), False, (17, 102, 0))
+        text_surface = gamefont.render("cpu: {p}%".format(p=cpu_usage), False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 85))
-        text_surface = gamefont.render("scale: {S}".format(S=display_sc), False, (17, 102, 0))
+        text_surface = gamefont.render("size: {x}x{y}".format(x=world_x_limit, y=world_y_limit), False, (17, 102, 0))
         world_screen.blit(text_surface, (5, 105))
+        text_surface = gamefont.render("scale: {S}".format(S=display_sc), False, (17, 102, 0))
+        world_screen.blit(text_surface, (5, 125))
 
         # render screen
         pygame.display.flip()
@@ -166,7 +183,7 @@ def main():
 
 if __name__ == "__main__":
     # ingest external arguments
-    seed_file, world_x_limit, world_y_limit, display_sc = check_arg(sys.argv[1:])
+    rules_file, seed_file, world_x_limit, world_y_limit, display_sc = check_arg(sys.argv[1:])
     # define shape of world space
     world_size = (world_x_limit, world_y_limit)
     # define shape of display
@@ -176,6 +193,8 @@ if __name__ == "__main__":
     new_world_space = np.zeros(world_size)
     # set display canvas
     world_screen = pygame.display.set_mode(display_size)
+    # from rules argument, load ruleset
+    rule_label, birth_list, survive_list = inject_rule(rules_file)
     # from seed argument, load seed array into world space
     seed_label = inject_seed(seed_file)
 

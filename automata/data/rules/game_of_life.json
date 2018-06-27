@@ -1,0 +1,7 @@
+{
+  "file_type": "rule",
+  "rule_name": "Game Of Life",
+  "rule_string": "B3/S23",
+  "birth": [3],
+  "survival": [2,3]
+}

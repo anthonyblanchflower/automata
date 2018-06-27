@@ -1,0 +1,7 @@
+{
+  "file_type": "rule",
+  "rule_name": "Mazectric",
+  "rule_string": "B3/S1234",
+  "birth": [3],
+  "survival": [1,2,3,4]
+}
