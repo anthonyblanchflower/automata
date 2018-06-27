@@ -1,0 +1,7 @@
+{
+  "file_type": "rule",
+  "rule_name": "Pedestrian Life",
+  "rule_string": "B38/S23",
+  "birth": [3,8],
+  "survival": [2,3]
+}
