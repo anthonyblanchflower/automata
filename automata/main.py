@@ -3,7 +3,9 @@ import os
 import subprocess
 import sys
 
+
 class Launcher(tkinter.Tk):
+
     def __init__(self, parent):
         tkinter.Tk.__init__(self, parent)
         self.configure(bg='black')
@@ -117,7 +119,7 @@ class Launcher(tkinter.Tk):
         self.labelVariable_Scale.set(self.menuVariable_Scale.get())
 
     def onbuttonclick_launch(self):
-        self.automataCall = sys.executable + " " + os.path.dirname(os.path.realpath(sys.argv[0])) + "/automata.py -r " \
+        self.automataCall = sys.executable + " " + os.path.dirname(os.path.realpath(sys.argv[0])) + "/Automata.py -r " \
                         + self.labelVariable_Rule.get() + \
                         " -s " + self.labelVariable_Seed.get() + \
                         " -x " + self.labelVariable_X.get() + \
@@ -127,6 +129,7 @@ class Launcher(tkinter.Tk):
 
 
 if __name__ == "__main__":
+
     app = Launcher(None)
     app.title('automata launcher')
     app.mainloop()

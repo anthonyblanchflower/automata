@@ -69,7 +69,7 @@ if __name__ == "__main__":
     # ingest external arguments
     rules, seed, xaxis, yaxis, scale = check_arg(sys.argv[1:])
     # inject internal arguments
-    speed = 1
+    speed = 0.1
     # initialise display canvas
     surface = pygame.display.set_mode((xaxis * scale, yaxis * scale))
     # set display caption

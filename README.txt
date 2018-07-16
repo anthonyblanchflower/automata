@@ -6,6 +6,6 @@ A cellular automata simulation
 
 Run main.py to launch.
 
-Press escape to quit simulation.
+## Create a distributable package
 
-
+python3 setup.py sdist

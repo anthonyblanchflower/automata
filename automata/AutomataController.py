@@ -11,13 +11,14 @@ class AutomataController:
     # contain any state and therefore does not need to contain any attributes.
 
     def update(self, delta_time, model):
+
         model.clock -= delta_time
+
         if model.clock < 0:
             model.clock += model.speed
-
-            neighbours = 0
             vectors = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]]
             for x, y in np.ndindex(model.world.shape):
+                neighbours = 0
                 for vector in vectors:
                     # plot location of neighbour cell
                     x_vector = x - vector[0]
@@ -31,8 +32,11 @@ class AutomataController:
                 if model.world[x, y] == 1:
                     if neighbours not in model.survive_list:
                         model.new_world[x, y] = 0
-                elif neighbours in model.birth_list:
-                    model.new_world[x, y] = 1
+                    else:
+                        model.new_world[x, y] = 1
+                else:
+                    if neighbours in model.birth_list:
+                        model.new_world[x, y] = 1
 
             model.world[:] = model.new_world
 
