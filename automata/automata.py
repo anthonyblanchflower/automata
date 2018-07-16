@@ -95,7 +95,7 @@ def report_adjacent_cells(x, y):
         x_vector = x - vector[0]
         y_vector = y - vector[1]
         # check adjacent cell is in world space
-        if (0 < x_vector <= world_x_limit - 1) and (0 < y_vector <= world_x_limit - 1):
+        if (0 < x_vector <= world_x_limit - 1) and (0 < y_vector <= world_y_limit - 1):
             # check adjacent cell is active
             if world_space[x_vector, y_vector] > 0:
                 # increment volume of adjacent active cells
